@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Manage Hero Images</h1>
+    
+    <!-- Form to add new hero image -->
+    <form method="POST">
+        <div class="form-group">
+            <label for="image_url">Image URL</label>
+            <input type="text" class="form-control" id="image_url" name="image_url" required>
+        </div>
+        <div class="form-group">
+            <label for="caption">Caption</label>
+            <input type="text" class="form-control" id="caption" name="caption">
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea class="form-control" id="description" name="description"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Image</button>
+    </form>
+    
+    <h2 class="mt-4">Existing Hero Images</h2>
+    <ul class="list-group">
+        {% for image in hero_images %}
+            <li class="list-group-item">
+                <img src="{{ image[1] }}" alt="Hero Image" style="width: 100%; max-width: 200px; border: 5px solid #ddd;">
+                <p><strong>Caption:</strong> {{ image[2] }}</p>
+                <p><strong>Description:</strong> {{ image[3] }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

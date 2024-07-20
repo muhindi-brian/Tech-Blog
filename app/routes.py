@@ -1,7 +1,7 @@
 from flask import render_template, url_for, flash, redirect, request
 from app import app, mysql
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, TextAreaField, FileField
+from wtforms import StringField, PasswordField, SubmitField, TextAreaField, FileField, SelectField
 from wtforms.validators import DataRequired, Email, EqualTo
 from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user, login_required
 import re
@@ -9,7 +9,6 @@ import os
 from werkzeug.utils import secure_filename
 
 # Configuration
-# UPLOAD_FOLDER = 'static/uploads'
 UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}
 
@@ -51,6 +50,7 @@ class PostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     content = TextAreaField('Content', validators=[DataRequired()])
     image = FileField('Image')
+    status = SelectField('Status', choices=[('published', 'Published'), ('draft', 'Draft'), ('archived', 'Archived')], default='draft')
     submit = SubmitField('Post')
 
 class ContactForm(FlaskForm):
@@ -67,12 +67,28 @@ def generate_slug(title):
 
 @app.route('/')
 def index():
-    """Render the index page with posts."""
+    """Render the index page with posts and hero images."""
     cursor = mysql.connection.cursor()
-    cursor.execute('SELECT * FROM posts ORDER BY created_at DESC')
+    
+    # Fetch posts
+    cursor.execute('SELECT id, title, content, created_at, slug FROM posts ORDER BY created_at DESC')
     posts = cursor.fetchall()
+    
+    # Fetch hero images
+    cursor.execute('SELECT * FROM hero_images')
+    hero_images = cursor.fetchall()
+    
     cursor.close()
-    return render_template('index.html', posts=posts)
+    return render_template('index.html', posts=posts, hero_images=hero_images)
+
+# @app.route('/')
+# def index():
+#     """Render the index page with posts."""
+#     cursor = mysql.connection.cursor()
+#     cursor.execute('SELECT * FROM posts ORDER BY created_at DESC')
+#     posts = cursor.fetchall()
+#     cursor.close()
+#     return render_template('index.html', posts=posts)
 
 @app.route('/about')
 def about():
@@ -141,6 +157,32 @@ def dashboard():
     """Render the dashboard page."""
     return render_template('dashboard.html')
 
+@app.route('/manage_posts', methods=['GET'])
+@login_required
+def manage_posts():
+    """Render the post management page."""
+    search_query = request.args.get('search', '')
+    status_filter = request.args.get('status', '')
+
+    query = 'SELECT * FROM posts WHERE 1=1'
+    params = []
+
+    if search_query:
+        query += ' AND title LIKE %s'
+        params.append(f'%{search_query}%')
+
+    if status_filter:
+        query += ' AND status = %s'
+        params.append(status_filter)
+
+    query += ' ORDER BY created_at DESC'
+
+    cursor = mysql.connection.cursor()
+    cursor.execute(query, tuple(params))
+    posts = cursor.fetchall()
+    cursor.close()
+    return render_template('manage_posts.html', posts=posts)
+
 @app.route('/new_post', methods=['GET', 'POST'])
 @login_required
 def new_post():
@@ -158,14 +200,12 @@ def new_post():
                 uploads_dir = os.path.join(app.root_path, UPLOAD_FOLDER)
                 os.makedirs(uploads_dir, exist_ok=True)  # Ensure directory exists
                 file_path = os.path.join(uploads_dir, filename)
-                print(f"Saving file to: {file_path}")
                 file.save(file_path)
                 image_url = url_for('static', filename=f'uploads/{filename}')
-                print(f"Saving file to: {file_path}")
         
         cursor = mysql.connection.cursor()
-        cursor.execute('INSERT INTO posts (title, content, slug, author_id, image_url) VALUES (%s, %s, %s, %s, %s)',
-                       (form.title.data, form.content.data, slug, current_user.id, image_url))
+        cursor.execute('INSERT INTO posts (title, content, slug, author_id, image_url, status) VALUES (%s, %s, %s, %s, %s, %s)',
+                       (form.title.data, form.content.data, slug, current_user.id, image_url, form.status.data))
         mysql.connection.commit()
         cursor.close()
         flash('Post created successfully', 'success')
@@ -185,7 +225,7 @@ def edit_post(slug):
         flash('Post not found or you do not have permission to edit it.', 'danger')
         return redirect(url_for('index'))
 
-    form = PostForm(data={'title': post[1], 'content': post[2]})
+    form = PostForm(data={'title': post[1], 'content': post[2], 'status': post[5]})
     if form.validate_on_submit():
         new_slug = generate_slug(form.title.data)
         image_url = post[4]  # Keep existing image URL
@@ -198,14 +238,12 @@ def edit_post(slug):
                 uploads_dir = os.path.join(app.root_path, UPLOAD_FOLDER)
                 os.makedirs(uploads_dir, exist_ok=True)  # Ensure directory exists
                 file_path = os.path.join(uploads_dir, filename)
-                print(f"Saving file to: {file_path}")
                 file.save(file_path)
                 image_url = url_for('static', filename=f'uploads/{filename}')
-                print(f"Saving file to: {file_path}")
         
         cursor = mysql.connection.cursor()
-        cursor.execute('UPDATE posts SET title = %s, content = %s, slug = %s, image_url = %s WHERE id = %s',
-                       (form.title.data, form.content.data, new_slug, image_url, post[0]))
+        cursor.execute('UPDATE posts SET title = %s, content = %s, slug = %s, image_url = %s, status = %s WHERE id = %s',
+                       (form.title.data, form.content.data, new_slug, image_url, form.status.data, post[0]))
         mysql.connection.commit()
         cursor.close()
         flash('Post updated successfully', 'success')
@@ -223,6 +261,32 @@ def delete_post(slug):
     cursor.close()
     flash('Post deleted successfully', 'success')
     return redirect(url_for('index'))
+
+@app.route('/manage_hero', methods=['GET', 'POST'])
+@login_required
+def manage_hero():
+    """Manage hero images."""
+    if request.method == 'POST':
+        # Handle form submission to add/update hero images
+        image_url = request.form['image_url']
+        caption = request.form['caption']
+        description = request.form['description']
+        
+        cursor = mysql.connection.cursor()
+        cursor.execute('INSERT INTO hero_images (image_url, caption, description) VALUES (%s, %s, %s)', (image_url, caption, description))
+        mysql.connection.commit()
+        cursor.close()
+        flash('Hero image added successfully!', 'success')
+        return redirect(url_for('manage_hero'))
+    
+    cursor = mysql.connection.cursor()
+    cursor.execute('SELECT * FROM hero_images')
+    hero_images = cursor.fetchall()
+    cursor.close()
+    
+    return render_template('manage_hero.html', hero_images=hero_images)
+
+
 
 @app.route('/logout')
 def logout():

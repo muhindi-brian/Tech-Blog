@@ -10,14 +10,18 @@
             <ul>
                 {% for post in posts %}
                     <li>
-                        <a href="{{ url_for('post', post_id=post[0]) }}">{{ post[1] }}</a>
-                        <a href="{{ url_for('edit_post', post_id=post[0]) }}" class="btn btn-warning btn-sm">Edit</a>
-                        <a href="{{ url_for('delete_post', post_id=post[0]) }}" class="btn btn-danger btn-sm">Delete</a>
+                        <a href="{{ url_for('post', slug=post[4]) }}">{{ post[1] }}</a>
+                        <a href="{{ url_for('edit_post', slug=post[4]) }}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{{ url_for('delete_post', slug=post[4]) }}" class="btn btn-danger btn-sm">Delete</a>
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
             <p>No posts available.</p>
         {% endif %}
+        
+        <!-- Manage Hero Section -->
+        <h2>Manage Hero Section</h2>
+        <a href="{{ url_for('manage_hero') }}" class="btn btn-primary">Manage Hero Images</a>
     </div>
 {% endblock %}

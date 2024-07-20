@@ -1,21 +1,24 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="jumbotron text-center">
-        <h1 class="display-4">Welcome to Tech Blog</h1>
-        <p class="lead">A place to share your tech knowledge and insights</p>
-        <hr class="my-4">
-        <p>New here? <a href="{{ url_for('register') }}">Register</a> or <a href="{{ url_for('login') }}">Login</a></p>
-    </div>
+<!-- Import Hero Section -->
+{% include 'hero.html' %}
 
-    <h1>Latest Posts</h1>
-    {% for post in posts %}
-        <div class="card mb-4">
-            <div class="card-body">
-                <h2 class="card-title"><a href="{{ url_for('post', slug=post[4]) }}">{{ post[1] }}</a></h2>
-                <p class="card-text">{{ post[2][:200] }}...</p>
-                <a href="{{ url_for('post', slug=post[4]) }}" class="btn btn-primary">Read More</a>
-            </div>
+<div class="jumbotron text-center">
+    <h1 class="display-4">Welcome to Tech Blog</h1>
+    <p class="lead">A place to share your tech knowledge and insights</p>
+    <hr class="my-4">
+    <p>New here? <a href="{{ url_for('register') }}">Register</a> or <a href="{{ url_for('login') }}">Login</a></p>
+</div>
+
+<h1>Latest Posts</h1>
+{% for post in posts %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="card-title"><a href="{{ url_for('post', slug=post[4]) }}">{{ post[1] }}</a></h2>
+            <p class="card-text">{{ post[2][:200] }}...</p>
+            <a href="{{ url_for('post', slug=post[4]) }}" class="btn btn-primary">Read More</a>
         </div>
-    {% endfor %}
+    </div>
+{% endfor %}
 {% endblock %}

@@ -62,3 +62,21 @@ nav a {
 .glassy-card .card-text a:hover {
     color: #138496;
 }
+
+
+/* Ensure the carousel takes up the full height of the viewport */
+.carousel, .carousel-inner, .carousel-item {
+    height: 100vh; /* 100% of the viewport height */
+}
+
+.carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensure the image covers the area without distortion */
+    border: 5px solid #ddd; /* Add border around the images */
+}
+
+.carousel-caption {
+    bottom: 20px; /* Adjust position of caption */
+    top: auto; /* Disable default top positioning */
+}
