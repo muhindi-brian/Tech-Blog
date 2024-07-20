@@ -20,6 +20,7 @@ CREATE TABLE posts (
     content TEXT NOT NULL,
     author_id INT NOT NULL,
     slug VARCHAR(255) UNIQUE NOT NULL,
+    image_url VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     -- FOREIGN KEY (author_id) REFERENCES users(id)
 );

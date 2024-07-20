@@ -2,8 +2,8 @@
 
 {% block content %}
     <div class="container">
-        <h1>New Post</h1>
-        <form method="POST" action="{{ url_for('new_post') }}">
+        <h1>Edit Post</h1>
+        <form method="POST" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <div class="form-group">
                 {{ form.title.label(class="form-label") }}
@@ -16,6 +16,13 @@
                 {{ form.content.label(class="form-label") }}
                 {{ form.content(class="form-control") }}
                 {% for error in form.content.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.image.label(class="form-label") }}
+                {{ form.image(class="form-control-file") }}
+                {% for error in form.image.errors %}
                     <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
             </div>
