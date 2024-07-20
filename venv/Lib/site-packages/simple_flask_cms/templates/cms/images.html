@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Images - FlaskCMS</title>
+    <link rel="stylesheet" href="{{ url_for('simple_flask_cms.static', filename='generated/editor.css') }}">
+</head>
+<body>
+<div class="main-content">
+    {% include 'cms/sidebar.html' %}
+    <main>
+        <h1>Images</h1>
+
+        <div class="images-table">
+            <div class="table-title">
+                Filename
+            </div>
+            <div class="table-title">
+                Preview
+            </div>
+            <div class="table-title">
+                Size
+            </div>
+            <div class="table-title">
+                Page
+            </div>
+            <div class="table-title">
+                Delete
+            </div>
+            {% for image in images %}
+                <div class="image-filename">
+                    {{ image.file }}
+                </div>
+                <div class="images-table-img-container">
+                    <img src="{{ url_for("simple_flask_cms.get_image", path=image.file) }}">
+                </div>
+                <div class="image-size">
+                    {{ '{:,}'.format(image.size) }} bytes
+                </div>
+                <div class="image-page">
+                    <a href="{{ image.page }}"> {{ image.page.split('/')[-1] }}</a>
+                </div>
+                <div>
+                    <button class="button button-red">
+                        Delete Image
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,2 @@
+[console_scripts]
+pythoncms = pythoncms.cli:cli

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ url }} - Flask CMS</title>
+    <link rel="stylesheet" href="{{ url_for('simple_flask_cms.static', filename='editor.css') }}">
+</head>
+<body>
+<h1>Page Editor</h1>
+
+<div class="main-content">
+    {% include 'cms/sidebar.html' %}
+    <main>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+        <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+
+        <label class="title-input">
+            <i>Title</i>
+            <input value="{{ current_page.title }}" id="input-title">
+        </label>
+
+        <p>Title is usually displayed at the top of the page</p>
+
+        {% if not current_page %}
+            <div class="warning">
+                This page does not exist yet, saving will create a new page.
+            </div>
+        {% endif %}
+
+        <label>
+            <i>Navigation Title</i>
+            <input value="{{ current_page.nav_title }}" id="input-nav-title">
+        </label>
+
+        <p>
+            The navigation title is displayed in links to this page.
+        </p>
+
+
+        <i>Page Content</i>
+        <textarea id="editor-main">{% filter trim %}
+            {{ current_page.content }}
+        {% endfilter %}</textarea>
+
+        <i>Images</i>
+        <div class="images-container">
+            {% for image in images %}
+                <div class="image-upload-container">
+                    <img src="{{ url_for("simple_flask_cms.get_image", path=image.file) }}">
+                    <div>
+                        Previously uploaded
+                    </div>
+                    <button class="button button-blue add-to-post-button" data-filename="{{ image.file }}"
+                            data-link="{{ url_for("simple_flask_cms.get_image", path=image.file) }}">
+                        Add to post
+                    </button>
+                    <button class="button button-red delete-image-button" data-filename="{{ image.file }}"
+                            data-delete_url="{{ url_for("simple_flask_cms.delete_image", filename=image.file) }}"
+                    >
+                        Delete
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+        <label>
+            <div class="file-upload">
+                Upload Image
+            </div>
+            <input type="file" style="display: none"
+                   accept="image/png, image/jpeg, image/gif, image/webp, image/jpg, image/tiff"
+                   id="input-image-upload"
+                   data-upload_to="{{ url_for("simple_flask_cms.upload_image") }}"
+                   data-delete_link="{{ url_for("simple_flask_cms.delete_image", filename="") }}"
+                   data-url="{{ url }}"
+            >
+        </label>
+
+        <label>
+            <i>Sort Order</i>
+            <input value="{{ current_page.sort_order or 0 }}" type="number" id="input-sort-order">
+        </label>
+
+        <p>
+            The sort order describes the order this page will appear in in navigation menus.
+        </p>
+
+        <label>
+            <i>URL</i>
+            <br>
+            <input readonly value="{{ url_for('simple_flask_cms.page', path=url) }}">
+        </label>
+
+        <div class="button-row">
+            <button class="button button-blue" id="submit-button">
+                Submit
+            </button>
+            <button class="button button-red" id="delete-button">
+                Delete Page
+            </button>
+        </div>
+        <script>
+            const simpleMDE = new SimpleMDE({element: document.getElementById("editor-main")});
+            const files = [];
+
+            const inputImageUpload = document.querySelector('#input-image-upload');
+
+            document.querySelectorAll('.add-to-post-button').forEach(
+                i => i.addEventListener('click', (ev) => {
+                        simpleMDE.value(
+                            simpleMDE.value() + `\n\n![${ev.target.dataset.filename}](${ev.target.dataset.link})`
+                        )
+                    }
+                )
+            );
+
+            async function delete_image(filename, div, link) {
+                const response = await fetch(
+                    link,
+                    {
+                        "method": "POST"
+                    }
+                );
+                if (!response.ok) {
+                    alert(await response.text());
+                }
+                div.parentElement.removeChild(div);
+            }
+
+            document.querySelectorAll('.delete-image-button').forEach(
+                i => i.addEventListener('click', (ev) => {
+                    delete_image(ev.currentTarget.dataset.filename, ev.currentTarget.parentElement,
+                        ev.currentTarget.dataset.delete_url
+                    )
+                })
+            )
+
+            inputImageUpload.addEventListener('change', async (ev) => {
+                const file = ev.target.files[0];
+                files.push(file);
+
+                const div = document.createElement('div');
+                div.classList.add('image-upload-container');
+
+                const image = document.createElement('img');
+                image.src = URL.createObjectURL(file);
+                div.appendChild(image);
+
+                const progress_indicator = document.createElement('div');
+                progress_indicator.textContent = 'uploading...';
+                div.appendChild(progress_indicator);
+
+
+                document.querySelector('.images-container').appendChild(
+                    div
+                );
+
+                const response = await fetch(
+                    inputImageUpload.dataset.upload_to,
+                    {
+                        'method': 'POST',
+                        'body': file,
+                        headers: {
+                            'X-Page': inputImageUpload.dataset.url,
+                            'X-filename': file.name
+                        }
+                    }
+                )
+
+                if (!response.ok) {
+                    alert(await response.text())
+                }
+
+                const data = await response.json();
+
+                const add_button = document.createElement('button');
+                add_button.textContent = 'Add to post';
+                add_button.dataset.link = data.path;
+                div.appendChild(add_button);
+
+                const delete_button = document.createElement('button');
+                delete_button.textContent = 'Delete';
+                delete_button.dataset.delete_link = ev.target.dataset.delete_link;
+                delete_button.classList.add('button-red', 'button');
+                div.appendChild(delete_button);
+
+                progress_indicator.textContent = 'Upload Completed!';
+                add_button.classList.add('button-blue', 'button')
+
+                add_button.addEventListener('click', () => {
+                    simpleMDE.value(
+                        simpleMDE.value() + `\n\n![${file.name}](${data.path})\n`
+                    )
+                });
+
+                delete_button.addEventListener(
+                    'click',
+                    () => {
+                        delete_image(
+                            data.path,
+                            div,
+                            ev.target.dataset.delete_link + data.filename
+                        )
+                    }
+                );
+            })
+
+            document.querySelector('#submit-button').addEventListener(
+                'click',
+                () => {
+                    fetch('',
+                        {
+                            'method': 'POST',
+                            'credentials': 'same-origin',
+                            'body': JSON.stringify({
+                                'title': document.getElementById('input-title').value,
+                                'content': simpleMDE.value(),
+                                'sort_order': document.getElementById('input-sort-order').value,
+                                'nav_title': document.getElementById('input-nav-title').value
+                            }),
+                            'headers': {
+                                'Content-Type': 'Application/JSON'
+                            }
+                        }
+                    )
+                }
+            )
+        </script>
+
+    </main>
+</div>
+</body>
+</html>

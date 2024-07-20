@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ url }} - Flask CMS</title>
+    <link rel="stylesheet" href="{{ url_for('simple_flask_cms.static', filename='generated/editor.css') }}">
+</head>
+<body>
+
+<div class="main-content">
+    {% include 'cms/sidebar.html' %}
+    <main>
+
+        <label class="title-input">
+            <i>Title</i>
+            <div class="button-row">
+                <input value="{{ current_page.title }}" id="input-title">
+                <a class="button button-blue" href="{{ url_for('simple_flask_cms.page', path=url) }}">
+                    Visit Page
+                </a>
+            </div>
+        </label>
+
+        <p>Title is usually displayed at the top of the page</p>
+
+        {% if not current_page %}
+            <div class="warning">
+                This page does not exist yet, saving will create a new page.
+            </div>
+        {% endif %}
+
+        <label>
+            <i>Navigation Title</i>
+            <input value="{{ current_page.nav_title }}" id="input-nav-title">
+        </label>
+
+        <p>
+            The navigation title is displayed in links to this page.
+        </p>
+
+
+        <i>Page Content</i>
+        <textarea id="editor-main">{% filter trim %}
+            {{ current_page.content }}
+        {% endfilter %}</textarea>
+
+        <i>Images</i>
+        <div class="images-container">
+            {% for image in images %}
+                <div class="image-upload-container">
+                    <img src="{{ url_for("simple_flask_cms.get_image", path=image.file) }}">
+                    <div>
+                        Previously uploaded
+                    </div>
+                    <button class="button button-blue add-to-post-button" data-filename="{{ image.file }}"
+                            data-link="{{ url_for("simple_flask_cms.get_image", path=image.file) }}">
+                        Add to post
+                    </button>
+                    <button class="button button-red delete-image-button" data-filename="{{ image.file }}"
+                            data-delete_url="{{ url_for("simple_flask_cms.delete_image", filename=image.file) }}"
+                    >
+                        Delete
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+        <label>
+            <div class="file-upload">
+                Upload Image
+            </div>
+            <input type="file" style="display: none"
+                   accept="image/png, image/jpeg, image/gif, image/webp, image/jpg, image/tiff"
+                   id="input-image-upload"
+                   data-upload_to="{{ url_for("simple_flask_cms.upload_image") }}"
+                   data-delete_link="{{ url_for("simple_flask_cms.delete_image", filename="") }}"
+                   data-url="{{ url }}"
+            >
+        </label>
+
+        <label>
+            <i>Sort Order</i>
+            <input value="{{ current_page.sort_order or 0 }}" type="number" id="input-sort-order">
+        </label>
+
+        <p>
+            The sort order describes the order this page will appear in in navigation menus.
+        </p>
+
+        <label>
+            <i>URL</i>
+            <br>
+            <input readonly value="{{ url_for('simple_flask_cms.page', path=url) }}">
+        </label>
+
+        <div class="button-row">
+            {% if current_page %}
+                <div>
+                    Last Modified: {{ current_page.date_modified.strftime('%a, %B %d at %H:%M') }}
+                </div>
+            {% endif %}
+            <button class="button button-blue" id="submit-button">
+                Save
+            </button>
+            <button class="button button-red" id="delete-button">
+                Delete Page
+            </button>
+        </div>
+
+    </main>
+
+    <div class="modal-container">
+        <div class="modal">
+            <h3>
+                Are you sure you want to delete this post?
+            </h3>
+            <div class="button-row">
+                <button class="button button-red" id="modal-delete-button"
+                        data-url="{{ url_for("simple_flask_cms.delete_page", path=url) }}">
+                    Delete
+                </button>
+                <button class="button button-blue" id="hide-modal-button"
+                >
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script
+        src="{{ url_for('simple_flask_cms.static', filename='generated/editor.js') }}"
+></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<aside class="sidebar">
+    <ul>
+        <li>
+            <a href="{{ url_for('simple_flask_cms.editor_home') }}">Editor Home</a>
+        </li>
+    </ul>
+    <h3>
+        Pages
+    </h3>
+    {% with pages=nav %}
+        {% include 'cms/recursive_nav.html' %}
+    {% endwith %}
+    <h3>Fragments</h3>
+    <ul>
+        {% for fragment in fragments %}
+            <li><a href="{{ url_for('simple_flask_cms.fragment', name=fragment.name) }}">{{ fragment.name }}</a></li>
+        {% endfor %}
+    </ul>
+    <h3>
+        Special
+    </h3>
+    <ul>
+        <li><a href="{{ url_for('simple_flask_cms.list_images') }}">Images</a></li>
+    </ul>
+</aside>

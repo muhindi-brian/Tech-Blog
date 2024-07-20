@@ -1,0 +1,10 @@
+<ul>
+    {% for page in nav %}
+        <li><a href="{{ page.get_absolute_url() }}">{{ page.nav_title }}</a></li>
+        {% if page.subpages %}
+            {% with nav=page.subpages %}
+                {% include 'cms/example_templates/nav.html' %}
+            {% endwith %}
+        {% endif %}
+    {% endfor %}
+</ul>

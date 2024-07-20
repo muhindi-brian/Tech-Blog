@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ url }} - Flask CMS</title>
+    <link rel="stylesheet" href="{{ url_for('simple_flask_cms.static', filename='generated/editor.css') }}">
+</head>
+<body>
+<h1>Page Editor</h1>
+
+<div class="main-content">
+    {% include 'cms/sidebar.html' %}
+    <main>
+        <p>
+            {{ fragment.fragment_type.description }}
+        </p>
+
+        <i>Page Content</i>
+        <textarea id="editor-main">{% filter trim %}
+            {{ fragment.content }}
+        {% endfilter %}</textarea>
+
+        <i>Images</i>
+        <div class="images-container">
+            {% for image in images %}
+                <div class="image-upload-container">
+                    <img src="{{ url_for("simple_flask_cms.get_image", path=image.file) }}">
+                    <div>
+                        Previously uploaded
+                    </div>
+                    <button class="button button-blue add-to-post-button" data-filename="{{ image.file }}"
+                            data-link="{{ url_for("simple_flask_cms.get_image", path=image.file) }}">
+                        Add to post
+                    </button>
+                    <button class="button button-red delete-image-button" data-filename="{{ image.file }}"
+                            data-delete_url="{{ url_for("simple_flask_cms.delete_image", filename=image.file) }}"
+                    >
+                        Delete
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+        <label>
+            <div class="file-upload">
+                Upload Image
+            </div>
+            <input type="file" style="display: none"
+                   accept="image/png, image/jpeg, image/gif, image/webp, image/jpg, image/tiff"
+                   id="input-image-upload"
+                   data-upload_to="{{ url_for("simple_flask_cms.upload_image") }}"
+                   data-delete_link="{{ url_for("simple_flask_cms.delete_image", filename="") }}"
+                   data-url="{{ '#fragment:'+fragment.name }}"
+            >
+        </label>
+
+        <label>
+            <i>URL</i>
+            <br>
+            <input readonly value="{{ fragment.fragment_type.url }}">
+        </label>
+
+        <div class="button-row">
+            {% if fragment %}
+                <div>
+                    Last Modified: {{ fragment.date_modified.strftime('%a, %B %d at %H:%M') }}
+                </div>
+            {% endif %}
+            <button class="button button-blue" id="submit-button">
+                Save
+            </button>
+        </div>
+    </main>
+
+</div>
+
+
+<script
+        src="{{ url_for('simple_flask_cms.static', filename='generated/fragment.js') }}"
+></script>
+</body>
+</html>

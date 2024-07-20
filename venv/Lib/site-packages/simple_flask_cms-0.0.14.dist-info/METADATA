@@ -1,0 +1,290 @@
+Metadata-Version: 2.1
+Name: simple-flask-cms
+Version: 0.0.14
+Summary: A minimal CMS for flask
+Home-page: https://gitlab.com/mousetail/simple-flask-cms
+Author: Maurits van Riezen (mousetail)
+Author-email: mousetail+pypi@mousetail.nl
+License: GPL-2
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Development Status :: 4 - Beta
+Classifier: Framework :: Flask
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Description-Content-Type: text/markdown
+Requires-Dist: flask
+Requires-Dist: markdown
+Requires-Dist: flask-sqlalchemy
+Requires-Dist: bleach
+Requires-Dist: pillow
+Requires-Dist: pydantic
+
+# Simple Flask CMS
+
+Simple flask CMS aims to be a very simple and flexible CMS system, suitable for a wide range of uses. The modular design
+allows you to use or not use various parts depending on use.
+
+Right now, the plugin is still in development, however, it aims to support the following features:
+
+Currently, working features
+
+* Simple page editor using SimpleMarkdownEditor
+* Ability to upload and manage images
+* Automatically generate navigation menus
+* Support for SQL
+* Authentication
+
+Currently, WIP features:
+
+* Headless mode
+* Support for MongoDB
+* More content types: Fragments and posts
+
+Now it uses SQL and mongoDB support was temporarily dropped, though it will be added again soon.
+
+## Installing
+
+Install via pip:
+
+```bash
+pip install simple_flask_cms
+```
+
+And use in your application:
+
+```python
+import simple_flask_cms
+
+app.register_blueprint(simple_flask_cms.cms)
+```
+
+You can set some settings:
+
+```python
+import simple_flask_cms.database_providers.sql_database
+
+simple_flask_cms.config.db_connection = simple_flask_cms.database_providers.sql_database.SQLDatabaseProvider(
+    app)  # The database to use
+# You can get a free mongoDB database from atlas, or use your own database. SQL support coming soon.
+simple_flask_cms.config.template_name = 'page.html'  # The template to use for CMS pages, later section explains in more detail.
+simple_flask_cms.config.upload_folder = 'media/images'  # Where to place uploaded images
+simple_flask_cms.config.authentication_function = simple_flask_cms.noop_authentication_function  # Used to authenticate requests
+```
+
+Simple-Flask-CMS will attempt to connect to the database before the first request.
+
+## Creating a page template
+
+If you want to use Simple-Flask-CMS for pages, you need to provide a page template. An example of a template would look
+like this:
+
+```jinja
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ page.title }}
+</head>
+<body>
+<h1>{{ page.title }}</h1>
+<article>
+     {{ page.html | safe }}
+</article>
+<nav>
+    {% include 'recursive_nav.html' %}
+</nav>
+```
+
+The file `recursive_nav.html`:
+
+```jinja
+<ul>
+    {% for page in nav %}
+        <li><a href="{{ page.get_absolute_url() }}">{{ page.nav_title }}</a></li>
+        {% if page.subpages %}
+            {% with nav=page.subpages %}
+                {% include 'recursive_nav.html' %}
+            {% endwith %}
+        {% endif %}
+    {% endfor %}
+</ul>
+```
+
+In the aim for minimalism, Simple Flask CMS gives you full control over the styling of your pages. However, if you want
+a preset look take a look at the example in the repository.
+
+## Creating your first page
+
+To create a page, navigate to `/cms/editor/[your new page path]`. Enter your settings for the page here. The page will
+be shown under `/cms/[page path]`. In the navigation `/cms/bugs/ladybuy` will appear under `/cms/bug`.
+
+### Title
+
+Typically displayed at the top of the page, though you can customize this in your template.
+
+### Navigation title
+
+Typically shown in the nav bar and in links to the page. Defaults to be the same as the title.
+
+### Page content
+
+The page content is markdown, using the [python-markdown](python-markdown.github.io) package. By default the code blocks
+and highlight extension are enabled.
+
+### Sort order
+
+The order that the page will be shown in under navigation. Defaults to the number of pages. 0 means auto.
+
+## Adding Authentication
+
+By default, anybody can create or delete pages. Typically, this is not what you want. Flask-Simple-CMS does not include
+it's own authentication function, but rather you can supply your own.
+
+The typical way is to assign a function to `cms.authentication_function`. This function should return `None` if the
+request is authorized. If it returns anything else, the returned value will be sent as a response back to the client
+instead of the action. An example of a authentication function using only basic auth is:
+
+```python
+def authentication_function(action, parameters):
+    if action in simple_flask_cms.config.viewer_paths:
+        return None  # Anonymous users can view but not edit pages
+
+    auth = flask.request.authorization
+    if auth and auth.username == config["username"] and auth["password"] == config["password"]:
+        return None
+    else:
+        return flask.Response(
+            status=401,
+            headers={'WWW-Authenticate': 'Basic realm="FlaskCMS"'}
+        )
+```
+
+Then set it like:
+
+```python
+cms.authentication_function = authentication_function
+```
+
+In this case, `action` is the name of the endpoint, and parameters are the path parameters. For example, if you wanted
+to hide a specific path from the viewer without authentication, replace the first if statement with this:
+
+```python
+if action in simple_flask_cms.config.viewer_paths and not parameters["path"].startswith("secret"):
+    return None
+```
+
+## Use in headless mode
+
+To use in headless mode, you can send a request from your frontend to `/cms/<page>` with the
+header `Content-Type: Application/JSON`. An example looks like this:
+
+```json
+{
+  "page": {
+    "path": "home",
+    "title": "Home",
+    "nav_title": "Home",
+    "sort_order": 0,
+    "date_modified": "2021-09-23T14:34:05.929918",
+    "subpages": [],
+    "content": "Home\n\n![image.jpg](/cms/images/image.jpg)",
+    "html": "<p>Home</p>\n<p><img alt=\"image.jpg\" src=\"/cms/images/image.jpg\"></p>"
+  },
+  "nav": [
+    {
+      "path": "home",
+      "title": "Home",
+      "nav_title": "Home",
+      "sort_order": 0,
+      "date_modified": "2021-09-23T14:34:05.929918",
+      "subpages": []
+    }
+  ]
+}
+```
+
+The response will contain both the raw markdown and the generated HTML by default. Usually, you want either one. You can
+configure this behavior with either of these headers:
+
+```text
+X-IncludeMarkdown: false
+X-IncludeHTML: false
+```
+
+# Fragments
+
+A fragment is a type of content intended for being embeded on another page. You would typically use a fragment if you
+want a small part of a page to be editable via the CMS but also need some advanced interactions or layout on the page
+that the CMS can't handle.
+
+To use fragments, assign a value to `simple_flask_cms.config.fragments`. For example, if you want the home page to have
+seperate boxes for the left and right column, you might do this:
+
+```python
+simple_flask_cms.config.fragments_map = [
+    simple_flask_cms.dataclasses.FragmentType(
+        name="Home Column 1",
+        description="Displayed in the left column in the home page",
+        url="/"
+    ),
+    simple_flask_cms.dataclasses.FragmentType(
+        name="Home Column 2",
+        description="Displayed in the right column in the home page",
+        url="/"
+    )
+]
+```
+
+Here, `name` is the unique identifier of the fragment. Must contain only url-safe characters.
+
+`description` is displayed at the top of the fragment editor. You can describe where the fragment is used in more detail
+here.
+
+Optionally, you can specify a `url` which is where the "visit this page" button will lead to.
+
+You can then use it in your template like this:
+
+```jinja
+<div>
+    {{ cms_fragment('Home Column 1') | safe }}
+    <a href="{{ url_for('simple_flask_cms.fragment', name='Home Column 1')}}">
+        Edit this fragment
+    </a>
+</div>
+```
+
+You probably want to selectively show the editor button depending on a users permissions. or not show it at all.
+
+# Custom context vars
+
+You can add custom context variables for use in your page template by assigning to the
+`config.extra_page_config_provider`. This function takes the path as a paramter and should return a dict which will be
+passed to the page template.
+
+# Extra Custom Pages in nav
+
+Often you might want to include other pages, not provided by the CMS visible in the navigation section too. You provide
+a list of such pages in `config.extra_nav_urls`. `nav_title` and `sort_order` work similar to normal pages, but
+the `redirect` will replace the destination of the link in nav.
+
+For example:
+
+```python
+simple_flask_cms.config.extra_nav_urls = [
+    simple_flask_cms.dataclasses.ExtraNavUrl(
+        nav_title="Color",
+        path="/colors",
+        redirect="/colors"
+    )
+]
+```
+
+You can also render navigation on a custom page using the `cms_nav` function, like this:
+```jinja
+{% with nav=cms_nav() %}
+    {% for page in nav %}
+        <!-- Put content here -->
+    {% endfor %}
+{% endwith %|
+```
+

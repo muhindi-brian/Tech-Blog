@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Editor - Flask CMS</title>
+    <link rel="stylesheet" href="{{ url_for('simple_flask_cms.static', filename='generated/editor.css') }}">
+</head>
+<body>
+
+<div class="main-content">
+    {% include 'cms/sidebar.html' %}
+    <main>
+        {% if nrof_pages == 0 %}
+            <h1>If you are seeing this, simple-flask-cms is installed correctly</h1>
+        {% else %}
+            <h1>Welcome to simple-flask-cms</h1>
+        {% endif %}
+
+        <p>
+            Need help getting started? Check out the <a href="https://gitlab.com/mousetail/simple-flask-cms">gitlab</a>
+        </p>
+
+        <p>
+            Currently there are {{ nrof_pages }} pages and {{ nrof_images }} images.
+        </p>
+
+        <div class="button-row">
+            <input placeholder="url" id="page-input">
+            <button class="button button-blue" id="create-page-button"
+                    data-url_root="{{ url_for('simple_flask_cms.editor', path='') }}"
+            >
+                Create Page
+            </button>
+        </div>
+    </main>
+
+    <script src="{{ url_for("simple_flask_cms.static", filename="generated/overview.js") }}"></script>
+</div>
+</body>
+</html>

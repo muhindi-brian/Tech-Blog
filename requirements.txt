@@ -1,0 +1,6 @@
+Flask
+Flask-MySQLdb
+Flask-WTF
+Flask-Login
+email_validator
+simple-flask-cms
