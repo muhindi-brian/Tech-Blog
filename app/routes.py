@@ -41,6 +41,12 @@ class PostForm(FlaskForm):
     content = TextAreaField('Content', validators=[DataRequired()])
     submit = SubmitField('Post')
 
+class ContactForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    message = TextAreaField('Message', validators=[DataRequired()])
+    submit = SubmitField('Send')
+
 def generate_slug(title):
     slug = re.sub(r'[^\w\s-]', '', title).strip().lower()
     slug = re.sub(r'[-\s]+', '-', slug)
@@ -53,6 +59,25 @@ def index():
     posts = cursor.fetchall()
     cursor.close()
     return render_template('index.html', posts=posts)
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/contact', methods=['GET', 'POST'])
+def contact():
+    form = ContactForm()
+    if form.validate_on_submit():
+        # Here you would typically send an email or store the message in the database
+        name = form.name.data
+        email = form.email.data
+        message = form.message.data
+
+        # For demonstration purposes, let's just flash a message
+        flash('Your message has been sent successfully.', 'success')
+        return redirect(url_for('contact'))
+
+    return render_template('contact.html', form=form)
 
 @app.route('/post/<slug>')
 def post(slug):

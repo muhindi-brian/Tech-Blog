@@ -47,6 +47,8 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('index') }}">Home</a>
                 </li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('about') }}">About Us</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('contact') }}">Contact Us</a></li>
                 {% if current_user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>

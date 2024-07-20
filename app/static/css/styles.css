@@ -36,3 +36,29 @@ nav a {
     background-color: #dff0d8;
     color: #3c763d;
 }
+
+
+.glassy-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #fff;
+}
+
+.glassy-card .card-body {
+    color: #fff;
+}
+
+.glassy-card .card-title {
+    color: #fff;
+}
+
+.glassy-card .card-text a {
+    color: #17a2b8;
+}
+
+.glassy-card .card-text a:hover {
+    color: #138496;
+}

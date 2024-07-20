@@ -3,6 +3,53 @@
 {% block title %}About Us{% endblock %}
 
 {% block content %}
-    <h1>About Us</h1>
-    <p>Welcome to the Tech Blog. Learn more about our mission and vision.</p>
+<div class="container mt-4">
+    <h1 class="mb-4">About Us</h1>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card glassy-card">
+                <div class="card-body">
+                    <h2 class="card-title">Our Mission</h2>
+                    <p class="card-text">At Tech Blog, our mission is to provide insightful, accurate, and engaging content about the latest trends and innovations in the tech industry. We strive to be the go-to source for tech enthusiasts and professionals alike.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card glassy-card">
+                <div class="card-body">
+                    <h2 class="card-title">Our Vision</h2>
+                    <p class="card-text">We envision a world where technology empowers everyone to achieve more. Our blog aims to inspire, inform, and educate our readers by delivering high-quality articles, tutorials, and news.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card glassy-card">
+                <div class="card-body">
+                    <h2 class="card-title">Meet the Team</h2>
+                    <p class="card-text">Our team is composed of passionate tech experts, writers, and enthusiasts dedicated to bringing you the best content. Learn more about our team members and their expertise.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card glassy-card">
+                <div class="card-body">
+                    <h2 class="card-title">Contact Us</h2>
+                    <p class="card-text">We value your feedback and suggestions. If you have any questions, comments, or ideas, feel free to reach out to us through our <a href="{{ url_for('contact') }}">Contact page</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card glassy-card">
+                <div class="card-body">
+                    <h2 class="card-title">Our Story</h2>
+                    <p class="card-text">Founded in [Year], Tech Blog started as a small project by a group of tech enthusiasts. Over the years, it has grown into a reputable source for tech news and insights, thanks to our dedicated readers and contributors.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
