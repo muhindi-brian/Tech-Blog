@@ -25,3 +25,39 @@
         <span class="sr-only">Next</span>
     </a>
 </div>
+
+<!-- CSS to ensure full-screen Hero section -->
+<style>
+    #heroCarousel {
+        position: relative;
+        width: relative;
+        height: relative;
+        overflow: hidden;
+    }
+    #heroCarousel .carousel-inner {
+        height: 100%;
+    }
+    #heroCarousel .carousel-item {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    #heroCarousel .carousel-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    #heroCarousel .carousel-caption {
+        bottom: 20px;
+    }
+</style>
+
+<!-- JS for carousel functionality -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        $('.carousel').carousel({
+            interval: 5000 // Adjust the interval as needed
+        });
+    });
+</script>

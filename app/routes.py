@@ -154,8 +154,12 @@ def register():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    """Render the dashboard page."""
-    return render_template('dashboard.html')
+    cursor = mysql.connection.cursor()
+    cursor.execute('SELECT * FROM posts WHERE author_id = %s ORDER BY created_at DESC', (current_user.id,))
+    posts = cursor.fetchall()
+    cursor.close()
+    return render_template('dashboard.html', posts=posts)
+
 
 @app.route('/manage_posts', methods=['GET'])
 @login_required
