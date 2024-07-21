@@ -22,3 +22,34 @@ def create_tables():
     ''')
     mysql.connection.commit()
     cursor.close()
+
+# Manual User class for authentication
+class User:
+    def __init__(self, id, username, email, password):
+        self.id = id
+        self.username = username
+        self.email = email
+        self.password = password
+
+    @staticmethod
+    def get_by_id(user_id):
+        cursor = mysql.connection.cursor()
+        cursor.execute('SELECT id, username, email, password FROM users WHERE id = %s', (user_id,))
+        user_data = cursor.fetchone()
+        cursor.close()
+        if user_data:
+            return User(*user_data)
+        return None
+
+    @staticmethod
+    def get_by_email(email):
+        cursor = mysql.connection.cursor()
+        cursor.execute('SELECT id, username, email, password FROM users WHERE email = %s', (email,))
+        user_data = cursor.fetchone()
+        cursor.close()
+        if user_data:
+            return User(*user_data)
+        return None
+
+    def check_password(self, password):
+        return self.password == password

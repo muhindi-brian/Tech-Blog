@@ -28,29 +28,37 @@
 
 <!-- CSS to ensure full-screen Hero section -->
 <style>
-    #heroCarousel {
-        position: relative;
-        width: relative;
-        height: relative;
-        overflow: hidden;
-    }
-    #heroCarousel .carousel-inner {
-        height: 100%;
-    }
-    #heroCarousel .carousel-item {
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    #heroCarousel .carousel-item img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    #heroCarousel .carousel-caption {
-        bottom: 20px;
-    }
+    /* Fullscreen Hero Section */
+#heroCarousel {
+    position: relative;
+    width: 100%;
+    height: 100vh; /* Full screen height */
+    overflow: hidden;
+    margin-top: 0%;
+}
+
+#heroCarousel .carousel-inner {
+    width: 100%;
+    height: 100%; /* Full height */
+}
+
+#heroCarousel .carousel-item {
+    height: 100%; /* Full height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#heroCarousel .carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#heroCarousel .carousel-caption {
+    bottom: 20px;
+}
+
 </style>
 
 <!-- JS for carousel functionality -->

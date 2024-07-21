@@ -1,47 +1,75 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="container mt-4">
-        <div class="jumbotron text-center">
-            <h1 class="display-4">Dashboard</h1>
-            <p class="lead">Welcome, {{ current_user.username }}!</p>
-            <a href="{{ url_for('new_post') }}" class="btn btn-primary btn-lg">Create New Post</a>
-        </div>
-        
-        <div class="row">
-            <div class="col-md-8">
-                <h2>Your Posts</h2>
-                {% if posts %}
-                    <div class="list-group">
-                        {% for post in posts %}
-                            <div class="list-group-item">
-                                <h5 class="mb-1">
-                                    <a href="{{ url_for('post', slug=post[4]) }}">{{ post[1] }}</a>
-                                </h5>
-                                <div class="d-flex w-100 justify-content-between">
-                                    <small>Posted on {{ post[5] }}</small>
-                                    <div>
-                                        <a href="{{ url_for('edit_post', slug=post[4]) }}" class="btn btn-warning btn-sm">Edit</a>
-                                        <a href="{{ url_for('delete_post', slug=post[4]) }}" class="btn btn-danger btn-sm">Delete</a>
-                                    </div>
+<div class="container mt-4">
+    <div class="jumbotron text-center">
+        <h1 class="display-4">Dashboard</h1>
+        <p class="lead">Welcome, {{ current_user.username }}!</p>
+        <a href="{{ url_for('new_post') }}" class="btn btn-primary btn-lg">Create New Post</a>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <h2>Your Posts</h2>
+            {% if posts %}
+                <div class="list-group">
+                    {% for post in posts %}
+                        <div class="list-group-item">
+                            <h5 class="mb-1">
+                                <a href="{{ url_for('post', slug=post[4]) }}">{{ post[1] }}</a>
+                            </h5>
+                            <div class="d-flex w-100 justify-content-between">
+                                <small>Posted on {{ post[5] }}</small>
+                                <div>
+                                    <a href="{{ url_for('edit_post', slug=post[4]) }}" class="btn btn-warning btn-sm">Edit</a>
+                                    <a href="{{ url_for('delete_post', slug=post[4]) }}" class="btn btn-danger btn-sm">Delete</a>
                                 </div>
                             </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <p class="text-muted">No posts available.</p>
-                {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No posts available.</p>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <!-- Manage Hero Section -->
+            <h2>Manage Hero Section</h2>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <p class="card-text">Update the Hero section images and details displayed on the home page.</p>
+                    <a href="{{ url_for('manage_hero') }}" class="btn btn-primary btn-block">Manage Hero Images</a>
+                </div>
             </div>
 
-            <div class="col-md-4">
-                <h2>Manage Hero Section</h2>
-                <div class="card">
-                    <div class="card-body">
-                        <p class="card-text">Update the Hero section images and details displayed on the home page.</p>
-                        <a href="{{ url_for('manage_hero') }}" class="btn btn-primary btn-block">Manage Hero Images</a>
-                    </div>
+            <!-- Manage Contact Messages Section -->
+            <h2>Manage Contact</h2>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <p class="card-text">View and manage messages sent via the contact form.</p>
+                    <a href="{{ url_for('contact_messages') }}" class="btn btn-primary btn-block">Manage Contact Messages</a>
+                </div>
+            </div>
+
+            <!-- Manage Posts Section -->
+            <h2>Manage Posts</h2>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <p class="card-text">Here you can manage your blog posts.</p>
+                    <a href="{{ url_for('manage_posts') }}" class="btn btn-primary btn-block">Go to Manage Posts</a>
+                </div>
+            </div>
+
+            <!-- Edit Profile Section -->
+            <h2>Edit Profile</h2>
+            <div class="card">
+                <div class="card-body">
+                    <p class="card-text">Update your profile information.</p>
+                    <a href="{{ url_for('profile') }}" class="btn btn-primary btn-block">Edit Profile</a>
                 </div>
             </div>
         </div>
     </div>
+</div>
 {% endblock %}

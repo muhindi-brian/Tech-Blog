@@ -5,6 +5,8 @@ USE tech_blog;
 DROP TABLE IF EXISTS posts;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS pages;
+DROP TABLE IF EXISTS hero_images;
+DROP TABLE IF EXISTS contact_messages;
 
 -- Create the users table
 CREATE TABLE users (
@@ -39,4 +41,13 @@ CREATE TABLE hero_images (
     url VARCHAR(255) NOT NULL,
     title VARCHAR(255),
     caption TEXT
+);
+
+-- Create the contact_messages table
+CREATE TABLE contact_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

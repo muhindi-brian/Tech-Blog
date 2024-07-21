@@ -1,0 +1,44 @@
+<!-- edit_profile.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="jumbotron text-center">
+        <h1 class="display-4">Edit Profile</h1>
+        <p class="lead">Update your profile information.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <form method="POST" action="{{ url_for('profile') }}">
+                {{ form.hidden_tag() }}
+                
+                <div class="form-group">
+                    {{ form.username.label(class="form-label") }}
+                    {{ form.username(class="form-control") }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control") }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.password.label(class="form-label") }}
+                    {{ form.password(class="form-control") }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.confirm.label(class="form-label") }}
+                    {{ form.confirm(class="form-control") }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.submit(class="btn btn-primary btn-block") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
