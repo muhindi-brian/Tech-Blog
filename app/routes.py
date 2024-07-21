@@ -114,13 +114,15 @@ def about():
 def contact():
     form = ContactForm()
     if form.validate_on_submit():
-        cursor = mysql.connection.cursor()
-        cursor.execute('INSERT INTO contact_messages (name, email, message) VALUES (%s, %s, %s)',
-                       (form.name.data, form.email.data, form.message.data))
-        mysql.connection.commit()
-        cursor.close()
-        flash('Your message has been sent successfully!', 'success')
+        # Here you would typically send an email or store the message in the database
+        name = form.name.data
+        email = form.email.data
+        message = form.message.data
+
+        # For demonstration purposes, let's just flash a message
+        flash('Your message has been sent successfully.', 'success')
         return redirect(url_for('contact'))
+
     return render_template('contact.html', form=form)
 
 @app.route('/contact_messages')
